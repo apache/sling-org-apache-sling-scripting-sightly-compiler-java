@@ -73,10 +73,11 @@ public abstract class AbstractRuntimeObjectModel implements RuntimeObjectModel {
 
     @Override
     public Object resolveProperty(Object target, Object property) {
-        Object resolved;
+        Object resolved = null;
         if (property instanceof Number) {
             resolved = ObjectModel.getIndex(target, ((Number) property).intValue());
-        } else {
+        }
+        if (resolved == null) {
             resolved = getProperty(target, property);
         }
         return resolved;
@@ -138,7 +139,7 @@ public abstract class AbstractRuntimeObjectModel implements RuntimeObjectModel {
             result = ((Record) target).getProperty(property);
         }
         if (result == null) {
-            result = ObjectModel.resolveProperty(target, property);
+            result = ObjectModel.resolveProperty(target, propertyObj);
         }
         return result;
     }
