@@ -73,6 +73,9 @@ public abstract class AbstractRuntimeObjectModel implements RuntimeObjectModel {
 
     @Override
     public Object resolveProperty(Object target, Object property) {
+        if (target == null || property == null) {
+            return null;
+        }
         Object resolved = null;
         if (property instanceof Number) {
             resolved = ObjectModel.getIndex(target, ((Number) property).intValue());
@@ -133,6 +136,9 @@ public abstract class AbstractRuntimeObjectModel implements RuntimeObjectModel {
     }
 
     protected Object getProperty(Object target, Object propertyObj) {
+        if (target == null || propertyObj == null) {
+            return null;
+        }
         String property = ObjectModel.toString(propertyObj);
         Object result = null;
         if (target instanceof Record) {
@@ -205,6 +211,9 @@ public abstract class AbstractRuntimeObjectModel implements RuntimeObjectModel {
      */
     @Deprecated
     protected Object getMapProperty(Map map, String property) {
+        if (map == null) {
+            return null;
+        }
         return map.get(property);
     }
 
