@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.apache.sling.scripting.sightly.compiler.RuntimeFunction;
 import org.apache.sling.scripting.sightly.compiler.expression.ExpressionNode;
 import org.apache.sling.scripting.sightly.compiler.expression.NodeVisitor;
 import org.apache.sling.scripting.sightly.compiler.expression.nodes.ArrayLiteral;
@@ -138,7 +137,7 @@ public final class TypeInference implements NodeVisitor<Type> {
     @Override
     public Type evaluate(RuntimeCall runtimeCall) {
         inferAll(runtimeCall.getArguments());
-        if (runtimeCall.getFunctionName().equals(RuntimeFunction.USE)) {
+        if (runtimeCall.getFunctionName().equals(RuntimeCall.USE)) {
             ExpressionNode identifier = runtimeCall.getArguments().get(0);
             if (identifier instanceof StringConstant) {
                 String objectType = ((StringConstant) identifier).getText();

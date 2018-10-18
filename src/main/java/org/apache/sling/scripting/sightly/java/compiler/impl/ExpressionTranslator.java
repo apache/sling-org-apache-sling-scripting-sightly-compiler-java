@@ -19,7 +19,6 @@ package org.apache.sling.scripting.sightly.java.compiler.impl;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.sling.scripting.sightly.compiler.RuntimeFunction;
 import org.apache.sling.scripting.sightly.compiler.expression.ExpressionNode;
 import org.apache.sling.scripting.sightly.compiler.expression.SideEffectVisitor;
 import org.apache.sling.scripting.sightly.compiler.expression.nodes.ArrayLiteral;
@@ -146,7 +145,7 @@ public final class ExpressionTranslator extends SideEffectVisitor {
                 .stringLiteral(runtimeCallName);
         for (ExpressionNode arg : runtimeCall.getArguments()) {
             source.separateArgument();
-            if (RuntimeFunction.USE.equals(runtimeCallName)) {
+            if (RuntimeCall.USE.equals(runtimeCallName)) {
                 if (arg instanceof StringConstant) {
                     StringConstant constant = (StringConstant) arg;
                     String className = constant.getText();

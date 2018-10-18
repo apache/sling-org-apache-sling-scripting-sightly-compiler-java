@@ -31,9 +31,9 @@ import org.apache.sling.scripting.sightly.compiler.java.utils.CharSequenceJavaCo
 import org.apache.sling.scripting.sightly.compiler.java.utils.TestUtils;
 import org.apache.sling.scripting.sightly.java.compiler.ClassInfo;
 import org.apache.sling.scripting.sightly.java.compiler.JavaClassBackendCompiler;
-import org.apache.sling.scripting.sightly.java.compiler.RenderUnit;
 import org.apache.sling.scripting.sightly.render.AbstractRuntimeObjectModel;
 import org.apache.sling.scripting.sightly.render.RenderContext;
+import org.apache.sling.scripting.sightly.render.RenderUnit;
 import org.apache.sling.scripting.sightly.render.RuntimeObjectModel;
 import org.junit.Test;
 
