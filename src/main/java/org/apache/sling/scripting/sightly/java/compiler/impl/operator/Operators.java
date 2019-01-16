@@ -37,12 +37,12 @@ public class Operators {
         representationMap.put(BinaryOperator.AND, LogicalOpGen.AND);
         representationMap.put(BinaryOperator.OR, LogicalOpGen.OR);
         representationMap.put(BinaryOperator.CONCATENATE, ConcatenateOpGen.INSTANCE);
-        representationMap.put(BinaryOperator.ADD, new NumericOpGen("+"));
-        representationMap.put(BinaryOperator.SUB, new NumericOpGen("-"));
-        representationMap.put(BinaryOperator.MUL, new NumericOpGen("*"));
-        representationMap.put(BinaryOperator.I_DIV, new LongOpGen("/"));
-        representationMap.put(BinaryOperator.REM, new LongOpGen("%"));
-        representationMap.put(BinaryOperator.DIV, new NumericOpGen("/"));
+        representationMap.put(BinaryOperator.ADD, new NumericOpGen("+", BinaryOperator.ADD));
+        representationMap.put(BinaryOperator.SUB, new NumericOpGen("-", BinaryOperator.SUB));
+        representationMap.put(BinaryOperator.MUL, new NumericOpGen("*", BinaryOperator.MUL));
+        representationMap.put(BinaryOperator.I_DIV, new LongOpGen("/", BinaryOperator.I_DIV));
+        representationMap.put(BinaryOperator.REM, new LongOpGen("%", BinaryOperator.REM));
+        representationMap.put(BinaryOperator.DIV, new NumericOpGen("/", BinaryOperator.DIV));
         representationMap.put(BinaryOperator.EQ, new EquivalenceOpGen(false));
         representationMap.put(BinaryOperator.NEQ, new EquivalenceOpGen(true));
         representationMap.put(BinaryOperator.LT, new ComparisonOpGen(BinaryOperator.LT));

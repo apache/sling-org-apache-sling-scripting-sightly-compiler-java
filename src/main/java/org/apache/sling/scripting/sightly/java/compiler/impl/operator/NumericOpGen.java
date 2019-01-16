@@ -17,9 +17,11 @@
 
 package org.apache.sling.scripting.sightly.java.compiler.impl.operator;
 
+import org.apache.sling.scripting.sightly.compiler.expression.nodes.BinaryOperator;
 import org.apache.sling.scripting.sightly.java.compiler.impl.ExpressionTranslator;
 import org.apache.sling.scripting.sightly.java.compiler.impl.GenHelper;
 import org.apache.sling.scripting.sightly.java.compiler.impl.JavaSource;
+import org.apache.sling.scripting.sightly.java.compiler.impl.SourceGenConstants;
 import org.apache.sling.scripting.sightly.java.compiler.impl.Type;
 
 /**
@@ -27,10 +29,15 @@ import org.apache.sling.scripting.sightly.java.compiler.impl.Type;
  */
 public class NumericOpGen implements BinaryOpGen {
 
-    private final String javaOperator;
+    private static final String OBJECT_NAME = BinaryOperator.class.getName();
+    private static final String METHOD_NAME = "eval";
 
-    public NumericOpGen(String javaOperator) {
+    private final String javaOperator;
+    private final BinaryOperator binaryOperator;
+
+    public NumericOpGen(String javaOperator, BinaryOperator binaryOperator) {
         this.javaOperator = javaOperator;
+        this.binaryOperator = binaryOperator;
     }
 
     @Override
@@ -41,9 +48,12 @@ public class NumericOpGen implements BinaryOpGen {
     @Override
     public void generate(JavaSource source, ExpressionTranslator visitor, TypedNode left, TypedNode right) {
         Type commonType = commonType(left.getType(), right.getType());
-        GenHelper.typeCoercion(source, visitor, left, commonType);
-        source.append(" ").append(javaOperator).append(" ");
-        GenHelper.typeCoercion(source, visitor, right, commonType);
+        source.objectModel().startCall(SourceGenConstants.ROM_TO_NUMBER, true).startMethodCall(OBJECT_NAME + "." + binaryOperator.name(),
+                METHOD_NAME);
+        left.getNode().accept(visitor);
+        source.separateArgument();
+        right.getNode().accept(visitor);
+        source.endCall().endCall().startCall(commonType.getNativeClass() + "Value", true).endCall();
     }
 
     protected Type commonType(Type leftType, Type rightType) {

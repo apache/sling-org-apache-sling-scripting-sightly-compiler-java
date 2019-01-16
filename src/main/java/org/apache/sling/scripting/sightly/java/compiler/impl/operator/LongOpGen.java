@@ -17,6 +17,7 @@
 
 package org.apache.sling.scripting.sightly.java.compiler.impl.operator;
 
+import org.apache.sling.scripting.sightly.compiler.expression.nodes.BinaryOperator;
 import org.apache.sling.scripting.sightly.java.compiler.impl.Type;
 
 /**
@@ -24,8 +25,8 @@ import org.apache.sling.scripting.sightly.java.compiler.impl.Type;
  */
 public class LongOpGen extends NumericOpGen {
 
-    public LongOpGen(String javaOperator) {
-        super(javaOperator);
+    public LongOpGen(String javaOperator, BinaryOperator binaryOperator) {
+        super(javaOperator, binaryOperator);
     }
 
     @Override

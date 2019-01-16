@@ -108,7 +108,27 @@ public class JavaClassBackendCompilerTest {
         CharSequenceJavaCompiler<RenderUnit> compiler = new CharSequenceJavaCompiler<>(classLoader, null);
         compiler.compile(classInfo.getFullyQualifiedClassName(), source);
     }
-    
+
+    @Test
+    public void sling_8217() throws Exception {
+        CompilationUnit compilationUnit = TestUtils.readScriptFromClasspath("/SLING-8217.html");
+        JavaClassBackendCompiler backendCompiler = new JavaClassBackendCompiler();
+        SightlyCompiler sightlyCompiler = new SightlyCompiler();
+        sightlyCompiler.compile(compilationUnit, backendCompiler);
+        ClassInfo classInfo = buildClassInfo("sling_8217");
+        String source = backendCompiler.build(classInfo);
+        StringWriter writer = new StringWriter();
+        Bindings bindings = new SimpleBindings();
+        HashMap<String, Integer> properties = new HashMap<String, Integer>(){{
+            put("begin", 1);
+        }};
+        bindings.put("properties", properties);
+        RenderContext renderContext = buildRenderContext(bindings);
+        render(writer, classInfo, source, renderContext, new SimpleBindings());
+        String expectedOutput = IOUtils.toString(this.getClass().getResourceAsStream("/SLING-8217.output.html"), "UTF-8");
+        assertEquals(expectedOutput, writer.toString());
+    }
+
     private static final String normalizeLineEndings(String input) {
         return StringUtils.replaceAll(input, "\r\n", "\n");
     }

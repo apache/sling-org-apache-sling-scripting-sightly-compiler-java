@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.FileObject;
 import javax.tools.ForwardingJavaFileManager;
@@ -124,13 +126,20 @@ public class CharSequenceJavaCompiler<T> {
      */
     public synchronized Class<T> compile(final String qualifiedClassName,
                                          final CharSequence javaSource,
-                                         final Class<?>... types) throws CharSequenceJavaCompilerException,
-            ClassCastException {
+                                         final Class<?>... types) throws ClassCastException {
         Map<String, CharSequence> classes = new HashMap<>(1);
         classes.put(qualifiedClassName, javaSource);
-        Map<String, Class<T>> compiled = compile(classes);
-        Class<T> newClass = compiled.get(qualifiedClassName);
-        return castable(newClass, types);
+        try {
+            Map<String, Class<T>> compiled = compile(classes);
+            Class<T> newClass = compiled.get(qualifiedClassName);
+            return castable(newClass, types);
+        } catch (CharSequenceJavaCompilerException e) {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (Diagnostic diagnostic : e.getDiagnostics().getDiagnostics()) {
+                stringBuilder.append(diagnostic.toString()).append(System.lineSeparator());
+            }
+            throw new RuntimeException(stringBuilder.toString());
+        }
     }
 
     /**
