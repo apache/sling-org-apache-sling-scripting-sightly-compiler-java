@@ -26,9 +26,9 @@ public class JavaEscapeUtilsTest {
 
     @Test
     public void testMakeJavaPackage() {
-        assertEquals("apps.projects.script_html", JavaEscapeUtils.makeJavaPackage("/apps/projects/script.html"));
+        assertEquals("apps.projects.script__002e__html", JavaEscapeUtils.makeJavaPackage("/apps/projects/script.html"));
         // test also with windows path names
-        assertEquals("apps.projects.script_html", JavaEscapeUtils.makeJavaPackage("\\apps\\projects\\script.html"));
+        assertEquals("apps.projects.script__002e__html", JavaEscapeUtils.makeJavaPackage("\\apps\\projects\\script.html"));
     }
 
 }

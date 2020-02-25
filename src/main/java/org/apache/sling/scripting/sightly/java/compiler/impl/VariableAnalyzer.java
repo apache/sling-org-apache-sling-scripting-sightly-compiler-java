@@ -22,9 +22,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.sling.scripting.sightly.java.compiler.SightlyJavaCompilerException;
-import org.apache.sling.scripting.sightly.java.compiler.JavaEscapeUtils;
+import org.apache.sling.commons.compiler.source.JavaEscapeHelper;
 import org.apache.sling.scripting.sightly.compiler.util.VariableTracker;
+import org.apache.sling.scripting.sightly.java.compiler.SightlyJavaCompilerException;
 
 /**
  * Data structure used in the analysis of variables
@@ -47,8 +47,8 @@ public class VariableAnalyzer {
      */
     public VariableDescriptor declareVariable(String originalName, Type type) {
         originalName = originalName.toLowerCase();
-        String assignedName = findSafeName(originalName);
-        VariableDescriptor descriptor = new VariableDescriptor(originalName, assignedName, type, VariableScope.SCOPED);
+        VariableDescriptor descriptor =
+                new VariableDescriptor(originalName, JavaEscapeHelper.getJavaIdentifier(originalName), type, VariableScope.SCOPED);
         tracker.pushVariable(originalName, descriptor);
         variables.add(descriptor);
         return descriptor;
@@ -140,21 +140,11 @@ public class VariableAnalyzer {
     }
 
     private String findDynamicName(String original) {
-        return DYNAMIC_PREFIX + JavaEscapeUtils.makeJavaIdentifier(original);
+        return DYNAMIC_PREFIX + JavaEscapeHelper.getJavaIdentifier(original);
     }
 
     private String findGlobalName(String original) {
-        return GLOBAL_PREFIX + JavaEscapeUtils.makeJavaIdentifier(original);
-    }
-
-    private String findSafeName(String original) {
-        int occurrenceCount = tracker.getOccurrenceCount(original);
-        String syntaxSafe = JavaEscapeUtils.makeJavaIdentifier(original);
-        if (occurrenceCount == 0) {
-            return syntaxSafe; //no other declarations in scope. Use this very name
-        } else {
-            return original + "_" + occurrenceCount;
-        }
+        return GLOBAL_PREFIX + JavaEscapeHelper.getJavaIdentifier(original);
     }
 
     private String validName(String name) {
