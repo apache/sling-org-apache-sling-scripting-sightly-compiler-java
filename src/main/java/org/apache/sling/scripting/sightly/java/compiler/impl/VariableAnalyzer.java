@@ -47,8 +47,9 @@ public class VariableAnalyzer {
      */
     public VariableDescriptor declareVariable(String originalName, Type type) {
         originalName = originalName.toLowerCase();
+        String safeName = findSafeName(originalName);
         VariableDescriptor descriptor =
-                new VariableDescriptor(originalName, JavaEscapeHelper.getJavaIdentifier(originalName), type, VariableScope.SCOPED);
+                new VariableDescriptor(originalName, JavaEscapeHelper.getJavaIdentifier(safeName), type, VariableScope.SCOPED);
         tracker.pushVariable(originalName, descriptor);
         variables.add(descriptor);
         return descriptor;
@@ -152,5 +153,15 @@ public class VariableAnalyzer {
             throw new SightlyJavaCompilerException("Unsupported identifier name: " + name);
         }
         return name.toLowerCase();
+    }
+
+    private String findSafeName(String original) {
+        int occurrenceCount = tracker.getOccurrenceCount(original);
+        String syntaxSafe = JavaEscapeHelper.getJavaIdentifier(original);
+        if (occurrenceCount == 0) {
+            return syntaxSafe; //no other declarations in scope. Use this very name
+        } else {
+            return original + "_" + occurrenceCount;
+        }
     }
 }

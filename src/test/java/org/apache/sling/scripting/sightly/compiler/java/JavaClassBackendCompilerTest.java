@@ -25,6 +25,7 @@ import javax.script.SimpleBindings;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.scripting.sightly.compiler.CompilationResult;
 import org.apache.sling.scripting.sightly.compiler.CompilationUnit;
 import org.apache.sling.scripting.sightly.compiler.SightlyCompiler;
 import org.apache.sling.scripting.sightly.compiler.java.utils.CharSequenceJavaCompiler;
@@ -126,6 +127,21 @@ public class JavaClassBackendCompilerTest {
         RenderContext renderContext = buildRenderContext(bindings);
         render(writer, classInfo, source, renderContext, new SimpleBindings());
         String expectedOutput = IOUtils.toString(this.getClass().getResourceAsStream("/SLING-8217.output.html"), "UTF-8");
+        assertEquals(expectedOutput, writer.toString());
+    }
+
+    @Test
+    public void testNestedLists() throws Exception {
+        CompilationUnit compilationUnit = TestUtils.readScriptFromClasspath("/nested-lists.html");
+        JavaClassBackendCompiler backendCompiler = new JavaClassBackendCompiler();
+        SightlyCompiler sightlyCompiler = new SightlyCompiler();
+        sightlyCompiler.compile(compilationUnit, backendCompiler);
+        ClassInfo classInfo = buildClassInfo("nested_lists");
+        String source = backendCompiler.build(classInfo);
+        StringWriter writer = new StringWriter();
+        RenderContext renderContext = buildRenderContext(new SimpleBindings());
+        render(writer, classInfo, source, renderContext, new SimpleBindings());
+        String expectedOutput = IOUtils.toString(this.getClass().getResourceAsStream("/nested-lists.output.html"), "UTF-8");
         assertEquals(expectedOutput, writer.toString());
     }
 
