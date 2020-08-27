@@ -44,7 +44,7 @@ public class EquivalenceOpGen implements BinaryOpGen {
         Type type = OpHelper.sameType(left, right);
         if (type != null && OpHelper.isNumericType(type) || type == Type.BOOLEAN || type == Type.UNKNOWN) {
             generateEqualsOperator(source, visitor, left.getNode(), right.getNode());
-        } else if (type != Type.UNKNOWN) {
+        } else {
             generateEqualsMethod(source, visitor, left, right);
         }
     }
@@ -62,6 +62,9 @@ public class EquivalenceOpGen implements BinaryOpGen {
 
     private void generateEqualsMethod(JavaSource source, SideEffectVisitor visitor, TypedNode leftNode, TypedNode rightNode) {
         boolean performCast = leftNode.getType().isPrimitive();
+        if (negated) {
+            source.negation();
+        }
         if (performCast) {
             source.startExpression();
             source.cast(Type.UNKNOWN.getNativeClass());
