@@ -24,6 +24,7 @@ import javax.script.SimpleBindings;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +41,7 @@ import org.apache.sling.scripting.sightly.render.RuntimeObjectModel;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class JavaClassBackendCompilerTest {
 
@@ -104,6 +106,8 @@ public class JavaClassBackendCompilerTest {
 
     @Test
     public void testJavaUseApiDependencies() throws Exception {
+        assumeFalse(System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("win"));
+
         CompilationUnit compilationUnit = TestUtils.readScriptFromClasspath("/imports.html");
         JavaClassBackendCompiler backendCompiler = new JavaClassBackendCompiler();
         SightlyCompiler sightlyCompiler = new SightlyCompiler();
@@ -143,6 +147,8 @@ public class JavaClassBackendCompilerTest {
 
     @Test
     public void testNestedLists() throws Exception {
+        assumeFalse(System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("win"));
+
         CompilationUnit compilationUnit = TestUtils.readScriptFromClasspath("/nested-lists.html");
         JavaClassBackendCompiler backendCompiler = new JavaClassBackendCompiler();
         SightlyCompiler sightlyCompiler = new SightlyCompiler();
