@@ -1,19 +1,21 @@
-/*******************************************************************************
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.apache.sling.scripting.sightly.java.compiler.impl;
 
 import java.util.HashMap;
@@ -29,8 +31,12 @@ import org.apache.sling.scripting.sightly.java.compiler.impl.operator.TypedNode;
  */
 public class GenHelper {
 
-    public static void generateTernary(JavaSource source, SideEffectVisitor visitor,
-                                       TypedNode condition, TypedNode thenBranch, TypedNode elseBranch) {
+    public static void generateTernary(
+            JavaSource source,
+            SideEffectVisitor visitor,
+            TypedNode condition,
+            TypedNode thenBranch,
+            TypedNode elseBranch) {
         source.startExpression();
         typeCoercion(source, visitor, condition, Type.BOOLEAN);
         source.conditional();
@@ -57,7 +63,7 @@ public class GenHelper {
     public static void listCoercion(JavaSource source, ExpressionTranslator visitor, TypedNode typedNode) {
         ExpressionNode node = typedNode.getNode();
         if (node instanceof Identifier) {
-            //using list coercion caching optimization
+            // using list coercion caching optimization
             VariableDescriptor descriptor = visitor.getAnalyzer().descriptor(((Identifier) node).getName());
             String listCoercionVar = descriptor.requireListCoercion();
             source.startExpression()
@@ -68,10 +74,10 @@ public class GenHelper {
                     .startExpression()
                     .append(listCoercionVar)
                     .assign()
-                    .objectModel().startCall(SourceGenConstants.ROM_TO_COLLECTION, true);
+                    .objectModel()
+                    .startCall(SourceGenConstants.ROM_TO_COLLECTION, true);
             node.accept(visitor);
-            source
-                    .endCall()
+            source.endCall()
                     .endExpression()
                     .conditionalBranchSep()
                     .append(listCoercionVar)
@@ -90,7 +96,8 @@ public class GenHelper {
         source.endExpression();
     }
 
-    private static void callDynamicCoercion(JavaSource source, SideEffectVisitor visitor, ExpressionNode node, String methodName) {
+    private static void callDynamicCoercion(
+            JavaSource source, SideEffectVisitor visitor, ExpressionNode node, String methodName) {
         source.objectModel().startCall(methodName, true);
         node.accept(visitor);
         source.endCall();
@@ -104,5 +111,4 @@ public class GenHelper {
         dynamicCoercions.put(Type.LONG, SourceGenConstants.ROM_TO_NUMBER);
         dynamicCoercions.put(Type.DOUBLE, SourceGenConstants.ROM_TO_NUMBER);
     }
-
 }

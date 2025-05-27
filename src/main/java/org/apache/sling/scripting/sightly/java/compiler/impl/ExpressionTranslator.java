@@ -1,19 +1,21 @@
-/*******************************************************************************
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.apache.sling.scripting.sightly.java.compiler.impl;
 
 import java.util.Map;
@@ -51,15 +53,12 @@ public final class ExpressionTranslator extends SideEffectVisitor {
     private ExpressionTranslator(JavaSource source, VariableAnalyzer analyzer, TypeInfo typeInfo, Set<String> imports) {
         this.source = source;
         this.analyzer = analyzer;
-        this.typeInfo= typeInfo;
+        this.typeInfo = typeInfo;
         this.imports = imports;
     }
 
-    public static void buildExpression(ExpressionNode node,
-                                       JavaSource source,
-                                       VariableAnalyzer analyzer,
-                                       TypeInfo typeInfo,
-                                       Set<String> imports) {
+    public static void buildExpression(
+            ExpressionNode node, JavaSource source, VariableAnalyzer analyzer, TypeInfo typeInfo, Set<String> imports) {
         ExpressionTranslator builder = new ExpressionTranslator(source, analyzer, typeInfo, imports);
         builder.traverse(node);
     }
@@ -75,7 +74,7 @@ public final class ExpressionTranslator extends SideEffectVisitor {
     @Override
     public void visit(PropertyAccess propertyAccess) {
         if (typeInfo.typeOf(propertyAccess.getTarget()) == Type.MAP) {
-            //Special optimization for maps
+            // Special optimization for maps
             visit(propertyAccess.getTarget());
             source.startCall(SourceGenConstants.MAP_GET, true);
             visit(propertyAccess.getProperty());
@@ -104,7 +103,9 @@ public final class ExpressionTranslator extends SideEffectVisitor {
     public void visit(BinaryOperation binaryOperation) {
         BinaryOpGen opGen = Operators.generatorFor(binaryOperation.getOperator());
         source.startExpression();
-        opGen.generate(source, this,
+        opGen.generate(
+                source,
+                this,
                 typeInfo.getTyped(binaryOperation.getLeftOperand()),
                 typeInfo.getTyped(binaryOperation.getRightOperand()));
         source.endExpression();
@@ -117,7 +118,7 @@ public final class ExpressionTranslator extends SideEffectVisitor {
 
     @Override
     public void visit(NumericConstant numericConstant) {
-        source.append(numericConstant.getValue().toString()); //todo: check correctness
+        source.append(numericConstant.getValue().toString()); // todo: check correctness
     }
 
     @Override
@@ -132,7 +133,9 @@ public final class ExpressionTranslator extends SideEffectVisitor {
 
     @Override
     public void visit(TernaryOperator ternaryOperator) {
-        GenHelper.generateTernary(source, this,
+        GenHelper.generateTernary(
+                source,
+                this,
                 typeInfo.getTyped(ternaryOperator.getCondition()),
                 typeInfo.getTyped(ternaryOperator.getThenBranch()),
                 typeInfo.getTyped(ternaryOperator.getElseBranch()));
