@@ -157,8 +157,8 @@ public class JavaClassBackendCompilerTest {
         assertEquals(expectedOutput, writer.toString());
     }
 
-    private static final String normalizeLineEndings(String input) {
-        return StringUtils.replaceAll(input, "\r\n", "\n");
+    private static String normalizeLineEndings(String input) {
+        return StringUtils.replaceAll(StringUtils.replaceAll(input, "\r\n", "\n"), "\r", "\n");
     }
 
     private ClassInfo buildClassInfo(final String info) {
