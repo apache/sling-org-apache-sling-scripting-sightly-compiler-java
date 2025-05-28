@@ -23,8 +23,9 @@ import javax.script.SimpleBindings;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Locale;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -41,7 +42,6 @@ import org.apache.sling.scripting.sightly.render.RuntimeObjectModel;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assume.assumeFalse;
 
 public class JavaClassBackendCompilerTest {
 
@@ -57,8 +57,9 @@ public class JavaClassBackendCompilerTest {
         Bindings bindings = new SimpleBindings();
         RenderContext renderContext = buildRenderContext(bindings);
         render(writer, classInfo, source, renderContext, new SimpleBindings());
-        String expectedOutput = IOUtils.toString(this.getClass().getResourceAsStream("/test-output.html"), "UTF-8");
-        assertEquals(expectedOutput, writer.toString());
+        String expectedOutput =
+                IOUtils.toString(this.getClass().getResourceAsStream("/test-output.html"), StandardCharsets.UTF_8);
+        assertEquals(normalizeLineEndings(expectedOutput), normalizeLineEndings(writer.toString()));
     }
 
     @Test
@@ -82,9 +83,9 @@ public class JavaClassBackendCompilerTest {
         });
         RenderContext renderContext = buildRenderContext(bindings);
         render(writer, classInfo, source, renderContext, new SimpleBindings());
-        String expectedOutput =
-                IOUtils.toString(this.getClass().getResourceAsStream("/SLING-6094.1.output.html"), "UTF-8");
-        assertEquals(expectedOutput, writer.toString());
+        String expectedOutput = IOUtils.toString(
+                this.getClass().getResourceAsStream("/SLING-6094.1.output.html"), StandardCharsets.UTF_8);
+        assertEquals(normalizeLineEndings(expectedOutput), normalizeLineEndings(writer.toString()));
     }
 
     @Test
@@ -99,15 +100,13 @@ public class JavaClassBackendCompilerTest {
         Bindings bindings = new SimpleBindings();
         RenderContext renderContext = buildRenderContext(bindings);
         render(writer, classInfo, source, renderContext, new SimpleBindings());
-        String expectedOutput =
-                IOUtils.toString(this.getClass().getResourceAsStream("/SLING-6094.2.output.html"), "UTF-8");
-        assertEquals(expectedOutput, writer.toString());
+        String expectedOutput = IOUtils.toString(
+                this.getClass().getResourceAsStream("/SLING-6094.2.output.html"), StandardCharsets.UTF_8);
+        assertEquals(normalizeLineEndings(expectedOutput), normalizeLineEndings(writer.toString()));
     }
 
     @Test
     public void testJavaUseApiDependencies() throws Exception {
-        assumeFalse(System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("win"));
-
         CompilationUnit compilationUnit = TestUtils.readScriptFromClasspath("/imports.html");
         JavaClassBackendCompiler backendCompiler = new JavaClassBackendCompiler();
         SightlyCompiler sightlyCompiler = new SightlyCompiler();
@@ -115,7 +114,7 @@ public class JavaClassBackendCompilerTest {
         ClassInfo classInfo = buildClassInfo("imports");
         String source = backendCompiler.build(classInfo);
         String expectedJavaOutput =
-                IOUtils.toString(this.getClass().getResourceAsStream("/imports.html.java"), "UTF-8");
+                IOUtils.toString(this.getClass().getResourceAsStream("/imports.html.java"), StandardCharsets.UTF_8);
         assertEquals(normalizeLineEndings(expectedJavaOutput), normalizeLineEndings(source));
         ClassLoader classLoader = JavaClassBackendCompilerTest.class.getClassLoader();
         CharSequenceJavaCompiler<RenderUnit> compiler = new CharSequenceJavaCompiler<>(classLoader, null);
@@ -132,7 +131,7 @@ public class JavaClassBackendCompilerTest {
         String source = backendCompiler.build(classInfo);
         StringWriter writer = new StringWriter();
         Bindings bindings = new SimpleBindings();
-        HashMap<String, Integer> properties = new HashMap<String, Integer>() {
+        Map<String, Integer> properties = new HashMap<>() {
             {
                 put("begin", 1);
             }
@@ -140,15 +139,13 @@ public class JavaClassBackendCompilerTest {
         bindings.put("properties", properties);
         RenderContext renderContext = buildRenderContext(bindings);
         render(writer, classInfo, source, renderContext, new SimpleBindings());
-        String expectedOutput =
-                IOUtils.toString(this.getClass().getResourceAsStream("/SLING-8217.output.html"), "UTF-8");
-        assertEquals(expectedOutput, writer.toString());
+        String expectedOutput = IOUtils.toString(
+                this.getClass().getResourceAsStream("/SLING-8217.output.html"), StandardCharsets.UTF_8);
+        assertEquals(normalizeLineEndings(expectedOutput), normalizeLineEndings(writer.toString()));
     }
 
     @Test
     public void testNestedLists() throws Exception {
-        assumeFalse(System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("win"));
-
         CompilationUnit compilationUnit = TestUtils.readScriptFromClasspath("/nested-lists.html");
         JavaClassBackendCompiler backendCompiler = new JavaClassBackendCompiler();
         SightlyCompiler sightlyCompiler = new SightlyCompiler();
@@ -158,13 +155,13 @@ public class JavaClassBackendCompilerTest {
         StringWriter writer = new StringWriter();
         RenderContext renderContext = buildRenderContext(new SimpleBindings());
         render(writer, classInfo, source, renderContext, new SimpleBindings());
-        String expectedOutput =
-                IOUtils.toString(this.getClass().getResourceAsStream("/nested-lists.output.html"), "UTF-8");
-        assertEquals(expectedOutput, writer.toString());
+        String expectedOutput = IOUtils.toString(
+                this.getClass().getResourceAsStream("/nested-lists.output.html"), StandardCharsets.UTF_8);
+        assertEquals(normalizeLineEndings(expectedOutput), normalizeLineEndings(writer.toString()));
     }
 
     private static String normalizeLineEndings(String input) {
-        return StringUtils.replaceAll(StringUtils.replaceAll(input, "\r\n", "\n"), "\r", "\n");
+        return StringUtils.replace(StringUtils.replaceAll(input, "\r\n", "\n"), "\\r\\n", "\\n");
     }
 
     private ClassInfo buildClassInfo(final String info) {
@@ -211,7 +208,7 @@ public class JavaClassBackendCompilerTest {
         ClassLoader classLoader = JavaClassBackendCompilerTest.class.getClassLoader();
         CharSequenceJavaCompiler<RenderUnit> compiler = new CharSequenceJavaCompiler<>(classLoader, null);
         Class<RenderUnit> newClass = compiler.compile(classInfo.getFullyQualifiedClassName(), source);
-        RenderUnit renderUnit = newClass.newInstance();
+        RenderUnit renderUnit = newClass.getDeclaredConstructor().newInstance();
         PrintWriter printWriter = new PrintWriter(writer);
         renderUnit.render(printWriter, renderContext, arguments);
     }
