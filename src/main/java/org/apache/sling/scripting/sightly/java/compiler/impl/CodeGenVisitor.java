@@ -1,19 +1,21 @@
-/*******************************************************************************
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.apache.sling.scripting.sightly.java.compiler.impl;
 
 import java.util.HashSet;
@@ -77,19 +79,20 @@ public class CodeGenVisitor implements CommandVisitor {
             } else {
                 initSource.startMethodCall(SourceGenConstants.BINDINGS_FIELD, SourceGenConstants.BINDINGS_GET_METHOD);
             }
-            initSource.stringLiteral(descriptor.getOriginalName())
-                    .endCall()
-                    .endStatement();
+            initSource.stringLiteral(descriptor.getOriginalName()).endCall().endStatement();
         } else if (scope == VariableScope.GLOBAL) {
-            initSource.beginAssignment(descriptor.getAssignedName())
+            initSource
+                    .beginAssignment(descriptor.getAssignedName())
                     .nullLiteral()
                     .endStatement();
         }
         String listCoercionVar = descriptor.getListCoercion();
         if (listCoercionVar != null) {
-            //need to initialize the list coercion to null
-            initSource.beginAssignment(listCoercionVar, SourceGenConstants.COLLECTION_TYPE)
-                    .nullLiteral().endStatement();
+            // need to initialize the list coercion to null
+            initSource
+                    .beginAssignment(listCoercionVar, SourceGenConstants.COLLECTION_TYPE)
+                    .nullLiteral()
+                    .endStatement();
         }
     }
 
@@ -104,7 +107,10 @@ public class CodeGenVisitor implements CommandVisitor {
         if (descriptor.getType() == Type.BOOLEAN) {
             source.append(descriptor.getAssignedName());
         } else {
-            source.objectModel().startCall(SourceGenConstants.ROM_TO_BOOLEAN, true).append(descriptor.getAssignedName()).endCall();
+            source.objectModel()
+                    .startCall(SourceGenConstants.ROM_TO_BOOLEAN, true)
+                    .append(descriptor.getAssignedName())
+                    .endCall();
         }
         source.completeIf();
     }
@@ -117,17 +123,16 @@ public class CodeGenVisitor implements CommandVisitor {
     @Override
     public void visit(VariableBinding.Start variableBinding) {
         source.startBlock();
-        TypeInfo typeInfo = TypeInference
-                .inferTypes(variableBinding.getExpression(), analyzer, unitBuilder.getImports(), unitBuilder.getJavaImportsAnalyzer());
+        TypeInfo typeInfo = TypeInference.inferTypes(
+                variableBinding.getExpression(),
+                analyzer,
+                unitBuilder.getImports(),
+                unitBuilder.getJavaImportsAnalyzer());
         Type type = typeInfo.typeOf(variableBinding.getExpression());
         String properName = declare(variableBinding.getVariableName(), type);
         source.beginAssignment(properName, type.getNativeClass());
         ExpressionTranslator.buildExpression(
-                variableBinding.getExpression(),
-                source,
-                analyzer,
-                typeInfo,
-                unitBuilder.getImports());
+                variableBinding.getExpression(), source, analyzer, typeInfo, unitBuilder.getImports());
         source.endStatement();
     }
 
@@ -136,7 +141,7 @@ public class CodeGenVisitor implements CommandVisitor {
         VariableDescriptor descriptor = analyzer.endVariable();
         String listCoercionVar = descriptor.getListCoercion();
         if (listCoercionVar != null) {
-            //this variable was coerced to list at some point
+            // this variable was coerced to list at some point
             generateCoercionClearing(listCoercionVar);
         }
         source.endBlock();
@@ -144,21 +149,20 @@ public class CodeGenVisitor implements CommandVisitor {
 
     @Override
     public void visit(VariableBinding.Global globalAssignment) {
-        TypeInfo typeInfo = TypeInference
-                .inferTypes(globalAssignment.getExpression(), analyzer, unitBuilder.getImports(), unitBuilder.getJavaImportsAnalyzer());
+        TypeInfo typeInfo = TypeInference.inferTypes(
+                globalAssignment.getExpression(),
+                analyzer,
+                unitBuilder.getImports(),
+                unitBuilder.getJavaImportsAnalyzer());
         VariableDescriptor descriptor = analyzer.declareGlobal(globalAssignment.getVariableName());
         String name = descriptor.getAssignedName();
         source.append(name).assign();
         ExpressionTranslator.buildExpression(
-                globalAssignment.getExpression(),
-                source,
-                analyzer,
-                typeInfo,
-                unitBuilder.getImports());
+                globalAssignment.getExpression(), source, analyzer, typeInfo, unitBuilder.getImports());
         source.endStatement();
         String listCoercionVar = descriptor.getListCoercion();
         if (listCoercionVar != null) {
-            //variable was used for list coercion. Generating a coercion clearing
+            // variable was used for list coercion. Generating a coercion clearing
             generateCoercionClearing(listCoercionVar);
         }
     }
@@ -168,7 +172,8 @@ public class CodeGenVisitor implements CommandVisitor {
         String variable = analyzer.assignedName(outputVariable.getVariableName());
         source.startStatement()
                 .startMethodCall(SourceGenConstants.OUT_BUFFER, SourceGenConstants.WRITE_METHOD)
-                .objectModel().startCall(SourceGenConstants.ROM_TO_STRING, true)
+                .objectModel()
+                .startCall(SourceGenConstants.ROM_TO_STRING, true)
                 .append(variable)
                 .endCall()
                 .endCall()
@@ -189,11 +194,16 @@ public class CodeGenVisitor implements CommandVisitor {
         VariableDescriptor descriptor = analyzer.descriptor(loop.getListVariable());
         String listVariable = descriptor.getAssignedName();
         String collectionVar = descriptor.requireListCoercion();
-        source.beginIf().append(collectionVar).equality().nullLiteral().completeIf()
+        source.beginIf()
+                .append(collectionVar)
+                .equality()
+                .nullLiteral()
+                .completeIf()
                 .startStatement()
                 .append(collectionVar)
                 .assign()
-                .objectModel().startCall(SourceGenConstants.ROM_TO_COLLECTION, true)
+                .objectModel()
+                .startCall(SourceGenConstants.ROM_TO_COLLECTION, true)
                 .append(listVariable)
                 .endCall()
                 .endStatement()
@@ -216,7 +226,8 @@ public class CodeGenVisitor implements CommandVisitor {
 
     @Override
     public void visit(Procedure.Start startProcedure) {
-        UnitBuilder subTemplateUnit = unitBuilder.newSubBuilder(startProcedure.getName(), startProcedure.getParameters());
+        UnitBuilder subTemplateUnit =
+                unitBuilder.newSubBuilder(startProcedure.getName(), startProcedure.getParameters());
         analyzer.declareTemplate(startProcedure.getName());
         control.push(new CodeGenVisitor(subTemplateUnit, control));
     }
@@ -249,6 +260,10 @@ public class CodeGenVisitor implements CommandVisitor {
     }
 
     private void generateCoercionClearing(String coercionVariableName) {
-        source.startStatement().append(coercionVariableName).assign().nullLiteral().endStatement();
+        source.startStatement()
+                .append(coercionVariableName)
+                .assign()
+                .nullLiteral()
+                .endStatement();
     }
 }

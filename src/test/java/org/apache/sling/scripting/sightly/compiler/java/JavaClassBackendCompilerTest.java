@@ -1,31 +1,33 @@
-/*******************************************************************************
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.apache.sling.scripting.sightly.compiler.java;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.HashMap;
 
 import javax.script.Bindings;
 import javax.script.SimpleBindings;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Locale;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.sling.scripting.sightly.compiler.CompilationResult;
 import org.apache.sling.scripting.sightly.compiler.CompilationUnit;
 import org.apache.sling.scripting.sightly.compiler.SightlyCompiler;
 import org.apache.sling.scripting.sightly.compiler.java.utils.CharSequenceJavaCompiler;
@@ -39,6 +41,7 @@ import org.apache.sling.scripting.sightly.render.RuntimeObjectModel;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class JavaClassBackendCompilerTest {
 
@@ -68,14 +71,19 @@ public class JavaClassBackendCompilerTest {
         String source = backendCompiler.build(classInfo);
         StringWriter writer = new StringWriter();
         Bindings bindings = new SimpleBindings();
-        bindings.put("img", new HashMap<String, Object>(){{
-            put("attributes", new HashMap<String, String>() {{
-                put("v-bind:src", "replaced");
-            }});
-        }});
+        bindings.put("img", new HashMap<String, Object>() {
+            {
+                put("attributes", new HashMap<String, String>() {
+                    {
+                        put("v-bind:src", "replaced");
+                    }
+                });
+            }
+        });
         RenderContext renderContext = buildRenderContext(bindings);
         render(writer, classInfo, source, renderContext, new SimpleBindings());
-        String expectedOutput = IOUtils.toString(this.getClass().getResourceAsStream("/SLING-6094.1.output.html"), "UTF-8");
+        String expectedOutput =
+                IOUtils.toString(this.getClass().getResourceAsStream("/SLING-6094.1.output.html"), "UTF-8");
         assertEquals(expectedOutput, writer.toString());
     }
 
@@ -91,19 +99,23 @@ public class JavaClassBackendCompilerTest {
         Bindings bindings = new SimpleBindings();
         RenderContext renderContext = buildRenderContext(bindings);
         render(writer, classInfo, source, renderContext, new SimpleBindings());
-        String expectedOutput = IOUtils.toString(this.getClass().getResourceAsStream("/SLING-6094.2.output.html"), "UTF-8");
+        String expectedOutput =
+                IOUtils.toString(this.getClass().getResourceAsStream("/SLING-6094.2.output.html"), "UTF-8");
         assertEquals(expectedOutput, writer.toString());
     }
 
     @Test
     public void testJavaUseApiDependencies() throws Exception {
+        assumeFalse(System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("win"));
+
         CompilationUnit compilationUnit = TestUtils.readScriptFromClasspath("/imports.html");
         JavaClassBackendCompiler backendCompiler = new JavaClassBackendCompiler();
         SightlyCompiler sightlyCompiler = new SightlyCompiler();
         sightlyCompiler.compile(compilationUnit, backendCompiler);
         ClassInfo classInfo = buildClassInfo("imports");
         String source = backendCompiler.build(classInfo);
-        String expectedJavaOutput = IOUtils.toString(this.getClass().getResourceAsStream("/imports.html.java"), "UTF-8");
+        String expectedJavaOutput =
+                IOUtils.toString(this.getClass().getResourceAsStream("/imports.html.java"), "UTF-8");
         assertEquals(normalizeLineEndings(expectedJavaOutput), normalizeLineEndings(source));
         ClassLoader classLoader = JavaClassBackendCompilerTest.class.getClassLoader();
         CharSequenceJavaCompiler<RenderUnit> compiler = new CharSequenceJavaCompiler<>(classLoader, null);
@@ -120,18 +132,23 @@ public class JavaClassBackendCompilerTest {
         String source = backendCompiler.build(classInfo);
         StringWriter writer = new StringWriter();
         Bindings bindings = new SimpleBindings();
-        HashMap<String, Integer> properties = new HashMap<String, Integer>(){{
-            put("begin", 1);
-        }};
+        HashMap<String, Integer> properties = new HashMap<String, Integer>() {
+            {
+                put("begin", 1);
+            }
+        };
         bindings.put("properties", properties);
         RenderContext renderContext = buildRenderContext(bindings);
         render(writer, classInfo, source, renderContext, new SimpleBindings());
-        String expectedOutput = IOUtils.toString(this.getClass().getResourceAsStream("/SLING-8217.output.html"), "UTF-8");
+        String expectedOutput =
+                IOUtils.toString(this.getClass().getResourceAsStream("/SLING-8217.output.html"), "UTF-8");
         assertEquals(expectedOutput, writer.toString());
     }
 
     @Test
     public void testNestedLists() throws Exception {
+        assumeFalse(System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("win"));
+
         CompilationUnit compilationUnit = TestUtils.readScriptFromClasspath("/nested-lists.html");
         JavaClassBackendCompiler backendCompiler = new JavaClassBackendCompiler();
         SightlyCompiler sightlyCompiler = new SightlyCompiler();
@@ -141,12 +158,13 @@ public class JavaClassBackendCompilerTest {
         StringWriter writer = new StringWriter();
         RenderContext renderContext = buildRenderContext(new SimpleBindings());
         render(writer, classInfo, source, renderContext, new SimpleBindings());
-        String expectedOutput = IOUtils.toString(this.getClass().getResourceAsStream("/nested-lists.output.html"), "UTF-8");
+        String expectedOutput =
+                IOUtils.toString(this.getClass().getResourceAsStream("/nested-lists.output.html"), "UTF-8");
         assertEquals(expectedOutput, writer.toString());
     }
 
-    private static final String normalizeLineEndings(String input) {
-        return StringUtils.replaceAll(input, "\r\n", "\n");
+    private static String normalizeLineEndings(String input) {
+        return StringUtils.replaceAll(StringUtils.replaceAll(input, "\r\n", "\n"), "\r", "\n");
     }
 
     private ClassInfo buildClassInfo(final String info) {
@@ -187,8 +205,9 @@ public class JavaClassBackendCompilerTest {
         };
     }
 
-    private void render(StringWriter writer, ClassInfo classInfo, String source, RenderContext renderContext, Bindings arguments) throws
-            Exception {
+    private void render(
+            StringWriter writer, ClassInfo classInfo, String source, RenderContext renderContext, Bindings arguments)
+            throws Exception {
         ClassLoader classLoader = JavaClassBackendCompilerTest.class.getClassLoader();
         CharSequenceJavaCompiler<RenderUnit> compiler = new CharSequenceJavaCompiler<>(classLoader, null);
         Class<RenderUnit> newClass = compiler.compile(classInfo.getFullyQualifiedClassName(), source);

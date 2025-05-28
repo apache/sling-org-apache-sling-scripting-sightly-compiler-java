@@ -1,20 +1,21 @@
-/*******************************************************************************
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
-
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.apache.sling.scripting.sightly.java.compiler.impl;
 
 import java.util.IdentityHashMap;
@@ -50,11 +51,11 @@ public final class TypeInference implements NodeVisitor<Type> {
     private final Map<ExpressionNode, Type> inferMap = new IdentityHashMap<>();
     private final Set<String> imports;
     private final JavaImportsAnalyzer importsAnalyzer;
-    private static final Pattern FQCN_PATTERN = Pattern.compile("([[\\p{L}&&[^\\p{Lu}]]_$][\\p{L}\\p{N}_$]*\\.)+[\\p{Lu}_$][\\p{L}\\p{N}_$]*");
+    private static final Pattern FQCN_PATTERN =
+            Pattern.compile("([[\\p{L}&&[^\\p{Lu}]]_$][\\p{L}\\p{N}_$]*\\.)+[\\p{Lu}_$][\\p{L}\\p{N}_$]*");
 
-
-    public static TypeInfo inferTypes(ExpressionNode node, VariableAnalyzer analyzer, Set<String> imports,
-                                      JavaImportsAnalyzer importsAnalyzer) {
+    public static TypeInfo inferTypes(
+            ExpressionNode node, VariableAnalyzer analyzer, Set<String> imports, JavaImportsAnalyzer importsAnalyzer) {
         TypeInference typeInference = new TypeInference(analyzer, imports, importsAnalyzer);
         typeInference.infer(node);
         return new TypeInfo(typeInference.inferMap);
@@ -65,8 +66,6 @@ public final class TypeInference implements NodeVisitor<Type> {
         this.imports = imports;
         this.importsAnalyzer = importsAnalyzer;
     }
-
-
 
     private Type infer(ExpressionNode node) {
         Type type = node.accept(this);
@@ -141,7 +140,9 @@ public final class TypeInference implements NodeVisitor<Type> {
             ExpressionNode identifier = runtimeCall.getArguments().get(0);
             if (identifier instanceof StringConstant) {
                 String objectType = ((StringConstant) identifier).getText();
-                if (FQCN_PATTERN.matcher(objectType).matches() && importsAnalyzer != null && importsAnalyzer.allowImport(objectType)) {
+                if (FQCN_PATTERN.matcher(objectType).matches()
+                        && importsAnalyzer != null
+                        && importsAnalyzer.allowImport(objectType)) {
                     imports.add(objectType);
                     return Type.dynamic(objectType);
                 }

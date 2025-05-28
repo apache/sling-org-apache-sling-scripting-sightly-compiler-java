@@ -1,20 +1,35 @@
-/*******************************************************************************
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.apache.sling.scripting.sightly.compiler.java.utils;
+
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticCollector;
+import javax.tools.FileObject;
+import javax.tools.ForwardingJavaFileManager;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaCompiler.CompilationTask;
+import javax.tools.JavaFileManager;
+import javax.tools.JavaFileObject;
+import javax.tools.JavaFileObject.Kind;
+import javax.tools.SimpleJavaFileObject;
+import javax.tools.StandardLocation;
+import javax.tools.ToolProvider;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -31,19 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import javax.tools.Diagnostic;
-import javax.tools.DiagnosticCollector;
-import javax.tools.FileObject;
-import javax.tools.ForwardingJavaFileManager;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaCompiler.CompilationTask;
-import javax.tools.JavaFileManager;
-import javax.tools.JavaFileObject;
-import javax.tools.JavaFileObject.Kind;
-import javax.tools.SimpleJavaFileObject;
-import javax.tools.StandardLocation;
-import javax.tools.ToolProvider;
 
 /**
  * This compiler is a slightly simplified version of the CharSequenceCompiler described at
@@ -82,13 +84,12 @@ public class CharSequenceJavaCompiler<T> {
     public CharSequenceJavaCompiler(ClassLoader loader, Iterable<String> options) {
         compiler = ToolProvider.getSystemJavaCompiler();
         if (compiler == null) {
-            throw new IllegalStateException("Cannot find the system Java compiler. "
-                    + "Check that your class path includes tools.jar");
+            throw new IllegalStateException(
+                    "Cannot find the system Java compiler. " + "Check that your class path includes tools.jar");
         }
         classLoader = new ClassLoaderImpl(loader);
         diagnostics = new DiagnosticCollector<>();
-        final JavaFileManager fileManager = compiler.getStandardFileManager(diagnostics,
-                null, null);
+        final JavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, null);
         // create our FileManager which chains to the default file manager
         // and our ClassLoader
         javaFileManager = new FileManagerImpl(fileManager, classLoader);
@@ -124,9 +125,9 @@ public class CharSequenceJavaCompiler<T> {
      *            if the generated class is not assignable to all the optional
      *            <var>types</var>.
      */
-    public synchronized Class<T> compile(final String qualifiedClassName,
-                                         final CharSequence javaSource,
-                                         final Class<?>... types) throws ClassCastException {
+    public synchronized Class<T> compile(
+            final String qualifiedClassName, final CharSequence javaSource, final Class<?>... types)
+            throws ClassCastException {
         Map<String, CharSequence> classes = new HashMap<>(1);
         classes.put(qualifiedClassName, javaSource);
         try {
@@ -161,34 +162,30 @@ public class CharSequenceJavaCompiler<T> {
      * @throws CharSequenceJavaCompilerException
      *            if the source cannot be compiled
      */
-    public synchronized Map<String, Class<T>> compile(final Map<String, CharSequence> classes) throws CharSequenceJavaCompilerException {
+    public synchronized Map<String, Class<T>> compile(final Map<String, CharSequence> classes)
+            throws CharSequenceJavaCompilerException {
         List<JavaFileObject> sources = new ArrayList<>();
         for (Entry<String, CharSequence> entry : classes.entrySet()) {
             String qualifiedClassName = entry.getKey();
             CharSequence javaSource = entry.getValue();
             if (javaSource != null) {
                 final int dotPos = qualifiedClassName.lastIndexOf('.');
-                final String className = dotPos == -1 ? qualifiedClassName
-                        : qualifiedClassName.substring(dotPos + 1);
-                final String packageName = dotPos == -1 ? "" : qualifiedClassName
-                        .substring(0, dotPos);
-                final JavaFileObjectImpl source = new JavaFileObjectImpl(className,
-                        javaSource);
+                final String className = dotPos == -1 ? qualifiedClassName : qualifiedClassName.substring(dotPos + 1);
+                final String packageName = dotPos == -1 ? "" : qualifiedClassName.substring(0, dotPos);
+                final JavaFileObjectImpl source = new JavaFileObjectImpl(className, javaSource);
                 sources.add(source);
                 // Store the source file in the FileManager via package/class
                 // name.
                 // For source files, we add a .java extension
-                javaFileManager.putFileForInput(StandardLocation.SOURCE_PATH, packageName,
-                        className + JAVA_EXTENSION, source);
+                javaFileManager.putFileForInput(
+                        StandardLocation.SOURCE_PATH, packageName, className + JAVA_EXTENSION, source);
             }
         }
         // Get a CompliationTask from the compiler and compile the sources
-        final CompilationTask task = compiler.getTask(null, javaFileManager, diagnostics,
-                options, null, sources);
+        final CompilationTask task = compiler.getTask(null, javaFileManager, diagnostics, options, null, sources);
         final Boolean result = task.call();
         if (result == null || !result) {
-            throw new CharSequenceJavaCompilerException("Compilation failed.", classes
-                    .keySet(), diagnostics);
+            throw new CharSequenceJavaCompilerException("Compilation failed.", classes.keySet(), diagnostics);
         }
         try {
             // For each class name in the input map, get its compiled
@@ -219,8 +216,7 @@ public class CharSequenceJavaCompiler<T> {
      *            if no such class is found.
      */
     @SuppressWarnings("unchecked")
-    public Class<T> loadClass(final String qualifiedClassName)
-            throws ClassNotFoundException {
+    public Class<T> loadClass(final String qualifiedClassName) throws ClassNotFoundException {
         return (Class<T>) classLoader.loadClass(qualifiedClassName);
     }
 
@@ -235,8 +231,7 @@ public class CharSequenceJavaCompiler<T> {
      * @throws ClassCastException
      *            if <var>newClass</var> is not castable to all the types.
      */
-    private Class<T> castable(Class<T> newClass, Class<?>... types)
-            throws ClassCastException {
+    private Class<T> castable(Class<T> newClass, Class<?>... types) throws ClassCastException {
         for (Class<?> type : types)
             if (!type.isAssignableFrom(newClass)) {
                 throw new ClassCastException(type.getName());
@@ -304,11 +299,9 @@ final class FileManagerImpl extends ForwardingJavaFileManager<JavaFileManager> {
      *      java.lang.String, java.lang.String)
      */
     @Override
-    public FileObject getFileForInput(Location location, String packageName,
-                                      String relativeName) throws IOException {
+    public FileObject getFileForInput(Location location, String packageName, String relativeName) throws IOException {
         FileObject o = fileObjects.get(uri(location, packageName, relativeName));
-        if (o != null)
-            return o;
+        if (o != null) return o;
         return super.getFileForInput(location, packageName, relativeName);
     }
 
@@ -325,8 +318,8 @@ final class FileManagerImpl extends ForwardingJavaFileManager<JavaFileManager> {
      * @param file
      *           the file object to store for later retrieval
      */
-    public void putFileForInput(StandardLocation location, String packageName,
-                                String relativeName, JavaFileObject file) {
+    public void putFileForInput(
+            StandardLocation location, String packageName, String relativeName, JavaFileObject file) {
         fileObjects.put(uri(location, packageName, relativeName), file);
     }
 
@@ -334,8 +327,7 @@ final class FileManagerImpl extends ForwardingJavaFileManager<JavaFileManager> {
      * Convert a location and class name to a URI
      */
     private URI uri(Location location, String packageName, String relativeName) {
-        return CharSequenceJavaCompiler.toURI(location.getName() + '/' + packageName + '/'
-                + relativeName);
+        return CharSequenceJavaCompiler.toURI(location.getName() + '/' + packageName + '/' + relativeName);
     }
 
     /**
@@ -347,8 +339,8 @@ final class FileManagerImpl extends ForwardingJavaFileManager<JavaFileManager> {
      *      javax.tools.FileObject)
      */
     @Override
-    public JavaFileObject getJavaFileForOutput(Location location, String qualifiedName,
-                                               Kind kind, FileObject outputFile) throws IOException {
+    public JavaFileObject getJavaFileForOutput(
+            Location location, String qualifiedName, Kind kind, FileObject outputFile) throws IOException {
         JavaFileObject file = new JavaFileObjectImpl(qualifiedName, kind);
         classLoader.add(qualifiedName, file);
         return file;
@@ -364,31 +356,24 @@ final class FileManagerImpl extends ForwardingJavaFileManager<JavaFileManager> {
         String result;
         // For our JavaFileImpl instances, return the file's name, else
         // simply run the default implementation
-        if (file instanceof JavaFileObjectImpl)
-            result = file.getName();
-        else
-            result = super.inferBinaryName(loc, file);
+        if (file instanceof JavaFileObjectImpl) result = file.getName();
+        else result = super.inferBinaryName(loc, file);
         return result;
     }
 
     @Override
-    public Iterable<JavaFileObject> list(Location location, String packageName,
-                                         Set<Kind> kinds, boolean recurse) throws IOException {
-        Iterable<JavaFileObject> result = super.list(location, packageName, kinds,
-                recurse);
+    public Iterable<JavaFileObject> list(Location location, String packageName, Set<Kind> kinds, boolean recurse)
+            throws IOException {
+        Iterable<JavaFileObject> result = super.list(location, packageName, kinds, recurse);
         ArrayList<JavaFileObject> files = new ArrayList<>();
-        if (location == StandardLocation.CLASS_PATH
-                && kinds.contains(JavaFileObject.Kind.CLASS)) {
+        if (location == StandardLocation.CLASS_PATH && kinds.contains(JavaFileObject.Kind.CLASS)) {
             for (JavaFileObject file : fileObjects.values()) {
-                if (file.getKind() == Kind.CLASS && file.getName().startsWith(packageName))
-                    files.add(file);
+                if (file.getKind() == Kind.CLASS && file.getName().startsWith(packageName)) files.add(file);
             }
             files.addAll(classLoader.files());
-        } else if (location == StandardLocation.SOURCE_PATH
-                && kinds.contains(JavaFileObject.Kind.SOURCE)) {
+        } else if (location == StandardLocation.SOURCE_PATH && kinds.contains(JavaFileObject.Kind.SOURCE)) {
             for (JavaFileObject file : fileObjects.values()) {
-                if (file.getKind() == Kind.SOURCE && file.getName().startsWith(packageName))
-                    files.add(file);
+                if (file.getKind() == Kind.SOURCE && file.getName().startsWith(packageName)) files.add(file);
             }
         }
         for (JavaFileObject file : result) {
@@ -432,8 +417,7 @@ final class JavaFileObjectImpl extends SimpleJavaFileObject {
      *           the source code
      */
     JavaFileObjectImpl(final String baseName, final CharSequence source) {
-        super(CharSequenceJavaCompiler.toURI(baseName + CharSequenceJavaCompiler.JAVA_EXTENSION),
-                Kind.SOURCE);
+        super(CharSequenceJavaCompiler.toURI(baseName + CharSequenceJavaCompiler.JAVA_EXTENSION), Kind.SOURCE);
         this.source = source;
     }
 
@@ -456,10 +440,8 @@ final class JavaFileObjectImpl extends SimpleJavaFileObject {
      * @see javax.tools.SimpleJavaFileObject#getCharContent(boolean)
      */
     @Override
-    public CharSequence getCharContent(final boolean ignoreEncodingErrors)
-            throws UnsupportedOperationException {
-        if (source == null)
-            throw new UnsupportedOperationException("getCharContent()");
+    public CharSequence getCharContent(final boolean ignoreEncodingErrors) throws UnsupportedOperationException {
+        if (source == null) throw new UnsupportedOperationException("getCharContent()");
         return source;
     }
 
@@ -511,8 +493,7 @@ final class ClassLoaderImpl extends ClassLoader {
     }
 
     @Override
-    protected Class<?> findClass(final String qualifiedClassName)
-            throws ClassNotFoundException {
+    protected Class<?> findClass(final String qualifiedClassName) throws ClassNotFoundException {
         JavaFileObject file = classes.get(qualifiedClassName);
         if (file != null) {
             byte[] bytes = ((JavaFileObjectImpl) file).getByteCode();
@@ -539,16 +520,15 @@ final class ClassLoaderImpl extends ClassLoader {
     }
 
     @Override
-    protected synchronized Class<?> loadClass(final String name, final boolean resolve)
-            throws ClassNotFoundException {
+    protected synchronized Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
         return super.loadClass(name, resolve);
     }
 
     @Override
     public InputStream getResourceAsStream(final String name) {
         if (name.endsWith(".class")) {
-            String qualifiedClassName = name.substring(0,
-                    name.length() - ".class".length()).replace('/', '.');
+            String qualifiedClassName =
+                    name.substring(0, name.length() - ".class".length()).replace('/', '.');
             JavaFileObjectImpl file = (JavaFileObjectImpl) classes.get(qualifiedClassName);
             if (file != null) {
                 return new ByteArrayInputStream(file.getByteCode());

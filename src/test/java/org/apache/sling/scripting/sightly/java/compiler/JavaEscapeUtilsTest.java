@@ -18,9 +18,9 @@
  */
 package org.apache.sling.scripting.sightly.java.compiler;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class JavaEscapeUtilsTest {
 
@@ -28,7 +28,7 @@ public class JavaEscapeUtilsTest {
     public void testMakeJavaPackage() {
         assertEquals("apps.projects.script__002e__html", JavaEscapeUtils.makeJavaPackage("/apps/projects/script.html"));
         // test also with windows path names
-        assertEquals("apps.projects.script__002e__html", JavaEscapeUtils.makeJavaPackage("\\apps\\projects\\script.html"));
+        assertEquals(
+                "apps.projects.script__002e__html", JavaEscapeUtils.makeJavaPackage("\\apps\\projects\\script.html"));
     }
-
 }
